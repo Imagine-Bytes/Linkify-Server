@@ -20,10 +20,14 @@ LinksAddedToTrees = 0;
 dailyTimer();
 
 //Register User
+router.get("/", (req, res) => {
+  res.send("<div><h1>Heyyyyyyyyy....Welcome </h1> <h1>Welcome to Linkify API</h1>  <h1> There is nothing to see here.. for now </h1> <h1> All functions are working tho ... check out <code>/admin</code> to get a peek at least  </h1> <h1> Will upload docs later ✌</h1></div>")
+});
+//Register User
 router.post("/register", (req, res) => {
   const treeLink = () => {
     const slice = id().slice(24, 36);
-    const mainLink = "http://linkify.io/t/" + slice;
+    const mainLink = "https://linkifyserver.herokuapp.com/t/" + slice;
     return mainLink;
   };
 
@@ -118,7 +122,7 @@ router.post("/shorten", verifyToken, (req, res) => {
   linkShortened += 1;
   const shortLink = () => {
     const slice = id().slice(0, 6);
-    const mainLink = "http://linkifyserver/s/" + slice;
+    const mainLink = "https://linkifyserver.herokuapp.com/s/" + slice;
     return mainLink;
   };
   const linkData = {
@@ -144,7 +148,7 @@ router.post("/shortenOnce", (req, res) => {
   linkShortened += 1;
   const shortLink = () => {
     const slice = id().slice(0, 6);
-    const mainLink = "http://linkifyserver/s/" + slice;
+    const mainLink = "https://linkifyserver.herokuapp.com/s/" + slice;
     return mainLink;
   };
   const linkData = {
@@ -187,7 +191,7 @@ router.get("/s/:link", (req, res) => {
   dailyClicks += 1;
   totalClicks += 1;
 
-  const fullLink = "http://linkifyserver/s/" + req.params.link;
+  const fullLink = "https://linkifyserver.herokuapp.com/s/" + req.params.link;
   Links.findOne({ link: fullLink })
     .then((link) => {
       if (link) {
