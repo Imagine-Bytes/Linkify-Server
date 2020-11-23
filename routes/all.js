@@ -5,10 +5,19 @@ const router = express.Router();
 const User = require("../models/user");
 const Links = require("../models/links");
 const Tree = require("../models/tree");
+const dailyTimer = require("./dailyTimer");
+const verifyToken = require("./verifyToken");
+const generateToken = require("./generateToken");
 const id = require("uuid");
-const config = require("../config/config")
-const options = { month: "long", day: "numeric" , year:"numeric"};
-const today = new Date().toLocaleDateString([],options);
+const dateFormat = { month: "long", day: "numeric", year: "numeric" };
+const today = new Date().toLocaleDateString([], dateFormat);
+dailyClicks = 0;
+totalClicks = 0;
+linkShortened = 0;
+LinksAddedToTrees = 0;
+
+// Timer for Daily Clicks
+dailyTimer();
 
 //Register User
 router.post("/register", (req, res) => {
@@ -23,13 +32,10 @@ router.post("/register", (req, res) => {
     password: req.body.password,
     user_id: id(),
     tree_link: treeLink(),
-    tree_id: id(),
     created: today,
   };
-
-
   User.findOne({
-    username: req.body.username
+    username: req.body.username,
   })
     .then((user) => {
       if (!user) {
@@ -57,26 +63,22 @@ router.post("/register", (req, res) => {
 
 //Login User
 router.post("/login", (req, res) => {
-
   User.findOne({ username: req.body.username })
     .then((user) => {
       if (user) {
         if (bcrypt.compareSync(req.body.password, user.password)) {
-          const userInfo = {
-            id: user.user_id,
-            username: user.username
-          };
-          let token = jwt.sign(userInfo, config.secretKey, {
-            expiresIn: 10000,
-          });
-  
-          res.json({ status: "Login Successful", token: token });
-          return
+          const id = user.id;
+          const link = user.tree_link;
+          const username = user.username;
+          generateToken(res, link, id, username);
+          res.json({ status: "Login Successful" });
+          return;
         } else {
           res.json({ error: "Password is incorrect" });
-          return
+          return;
         }
-      } res.json({ error: "User doesn't exist" });
+      }
+      res.json({ error: "User doesn't exist" });
     })
     .catch((err) => {
       res.json({ error: err });
@@ -84,22 +86,25 @@ router.post("/login", (req, res) => {
 });
 
 // Get My Links via User ID
-router.post("/mylinks", (req, res) => {
-  const user_id = req.body.user_id;
+router.get("/mylinks", verifyToken, (req, res) => {
+  const user_id = req.user.id;
   Links.find({ user_id: user_id })
     .then((links) => {
-      if (links) { res.json({ message: "success", results: links }); return }
-      res.json({error:"User ID doesn't exist"})
+      if (links) {
+        res.json({ message: "success", results: links });
+        return;
+      }
+      res.json({ error: "User ID doesn't exist" });
     })
     .catch((err) => {
       res.json({ error: err });
     });
 });
 
-// Get Link Tree via Tree ID
-router.post("/mytree", (req, res) => {
-  const tree_id = req.body.tree_id;
-  Tree.find({ tree_id: tree_id })
+// Get Link Tree via Tree Link
+router.get("/mytree", verifyToken, (req, res) => {
+  const tree_link = req.user.link;
+  Tree.find({ tree_link: tree_link })
     .then((tree) => {
       res.json({ message: "success", results: tree });
     })
@@ -108,18 +113,19 @@ router.post("/mytree", (req, res) => {
     });
 });
 
-// Create Shortened Link
-router.post("/shortenlink", (req, res) => {
+// Create Shortened Link for Logged In users
+router.post("/shorten", verifyToken, (req, res) => {
+  linkShortened += 1;
   const shortLink = () => {
     const slice = id().slice(0, 6);
-    const mainLink = "http://localhost:3000/s/" + slice;
+    const mainLink = "http://linkifyserver/s/" + slice;
     return mainLink;
   };
   const linkData = {
     link: shortLink(),
     main_url: req.body.main_url,
     status: req.body.status || "OK",
-    user_id: req.body.user_id || "0000",
+    user_id: req.user.id || "0000",
     created: today,
   };
 
@@ -132,18 +138,38 @@ router.post("/shortenlink", (req, res) => {
     });
 });
 
-// Add Link to Tree
-router.post("/addLink", (req, res) => {
+
+// Create Shortened Link for One-Time Users
+router.post("/shortenOnce", (req, res) => {
+  linkShortened += 1;
   const shortLink = () => {
-    const slice = id().slice(24, 36);
-    const mainLink = "http://linkify.io/" + slice;
+    const slice = id().slice(0, 6);
+    const mainLink = "http://linkifyserver/s/" + slice;
     return mainLink;
   };
   const linkData = {
     link: shortLink(),
     main_url: req.body.main_url,
+    status: req.body.status || "OK",
+    user_id: "0000",
+    created: today,
+  };
+
+  Links.create(linkData)
+    .then((link) => {
+      res.json({ message: "Link has been Shortened" });
+    })
+    .catch((err) => {
+      res.json({ error: err });
+    });
+});
+// Add Link to Tree
+router.post("/addLink", verifyToken, (req, res) => {
+  LinksAddedToTrees += 1
+  const linkData = {
+    main_url: req.body.main_url,
     name: req.body.name,
-    tree_id: req.body.tree_id,
+    tree_link: req.user.link,
     created: today,
   };
 
@@ -158,21 +184,37 @@ router.post("/addLink", (req, res) => {
 
 // Redirect Shortened Links // The use of localhost is for development purposes only, on deploy it will be linkify.io
 router.get("/s/:link", (req, res) => {
-  const fullLink = "http://localhost:3000/s/" + req.params.link;
+  dailyClicks += 1;
+  totalClicks += 1;
+
+  const fullLink = "http://linkifyserver/s/" + req.params.link;
   Links.findOne({ link: fullLink })
     .then((link) => {
       if (link) {
         const mainLink = link.main_url;
-        res.redirect(mainLink);
-        return
+        res.status(301).redirect(mainLink);
+        return;
       }
-      res.json({error:"Link doesn't exist"})
+      res.json({ error: "Link doesn't exist" });
+      return
     })
     .catch((err) => {
-    res.json({error:err})
-  })
-})
+      res.json({ error: err });
+    });
+});
 
-
+//Admin Route
+router.get("/admin", (req, res) => {
+  User.find()
+    .countDocuments()
+    .then((users) => {
+      res.json({
+        users: users,
+        totalClicks: totalClicks,
+        dailyClicks: dailyClicks,
+        linkShortened: linkShortened,
+      });
+    });
+});
 
 module.exports = router;

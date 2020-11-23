@@ -1,10 +1,7 @@
 const mongoose = require("mongoose");
 
 const TreeSchema = mongoose.Schema({
-  link: {
-    type: String,
-    required: true,
-  },
+
   main_url: {
     type: String,
     required: true,
@@ -13,7 +10,7 @@ const TreeSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  tree_id: {
+  tree_link: {
     type: String,
     required:true,
   },
