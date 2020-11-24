@@ -1,6 +1,5 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const router = express.Router();
 const User = require("../models/user");
 const Links = require("../models/links");
@@ -19,10 +18,7 @@ LinksAddedToTrees = 0;
 // Timer for Daily Clicks
 dailyTimer();
 
-//Register User
-router.get("/", (req, res) => {
-  res.send("<div><h1>Heyyyyyyyyy....Welcome </h1> <h1>Welcome to Linkify API</h1>  <h1> There is nothing to see here.. for now </h1> <h1> All functions are working tho ... check out <code>/admin</code> to get a peek at least  </h1> <h1> Will upload docs later ✌</h1></div>")
-});
+
 //Register User
 router.post("/register", (req, res) => {
   const treeLink = () => {
@@ -122,20 +118,25 @@ router.post("/shorten", verifyToken, (req, res) => {
   linkShortened += 1;
   const shortLink = () => {
     const slice = id().slice(0, 6);
-    const mainLink = "https://linkifyserver.herokuapp.com/s/" + slice;
+    const mainLink = "https://linkifyserver.herokuapp.com/" + slice;
     return mainLink;
   };
+  var url = req.body.main_url
+  if (url.indexOf('https://') != 0 || url.indexOf('http://') != 0) {
+    var mainUrl = "http://" + url
+  }
+  const shortenedLink = shortLink();
   const linkData = {
-    link: shortLink(),
-    main_url: req.body.main_url,
+    link: shortenedLink,
+    main_url: mainUrl,
     status: req.body.status || "OK",
-    user_id: req.user.id || "0000",
+    user_id: req.user.id,
     created: today,
   };
 
   Links.create(linkData)
     .then((link) => {
-      res.json({ message: "Link has been Shortened" });
+      res.json({ message: "Link has been Shortened", shortLink: {shortenedLink} });
     })
     .catch((err) => {
       res.json({ error: err });
@@ -144,16 +145,21 @@ router.post("/shorten", verifyToken, (req, res) => {
 
 
 // Create Shortened Link for One-Time Users
-router.post("/shortenOnce", (req, res) => {
+router.post("/shortenonce", (req, res) => {
   linkShortened += 1;
   const shortLink = () => {
     const slice = id().slice(0, 6);
-    const mainLink = "https://linkifyserver.herokuapp.com/s/" + slice;
+    const mainLink = "https://linkifyserver.herokuapp.com/" + slice;
     return mainLink;
   };
+  var url = req.body.main_url
+  if (url.indexOf('https://') != 0 || url.indexOf('http://') != 0) {
+    var mainUrl = "http://" + url
+  }
+  const shortenedLink = shortLink();
   const linkData = {
-    link: shortLink(),
-    main_url: req.body.main_url,
+    link: shortenedLink,
+    main_url: mainUrl,
     status: req.body.status || "OK",
     user_id: "0000",
     created: today,
@@ -161,14 +167,14 @@ router.post("/shortenOnce", (req, res) => {
 
   Links.create(linkData)
     .then((link) => {
-      res.json({ message: "Link has been Shortened" });
+      res.json({ message: "Link has been Shortened",shortLink:{shortenedLink} });
     })
     .catch((err) => {
       res.json({ error: err });
     });
 });
 // Add Link to Tree
-router.post("/addLink", verifyToken, (req, res) => {
+router.post("/addlink", verifyToken, (req, res) => {
   LinksAddedToTrees += 1
   const linkData = {
     main_url: req.body.main_url,
@@ -187,11 +193,10 @@ router.post("/addLink", verifyToken, (req, res) => {
 });
 
 // Redirect Shortened Links // The use of localhost is for development purposes only, on deploy it will be linkify.io
-router.get("/s/:link", (req, res) => {
+router.get("/:link", (req, res) => {
   dailyClicks += 1;
   totalClicks += 1;
-
-  const fullLink = "https://linkifyserver.herokuapp.com/s/" + req.params.link;
+  const fullLink = "https://linkifyserver.herokuapp.com/" + req.params.link;
   Links.findOne({ link: fullLink })
     .then((link) => {
       if (link) {
@@ -199,12 +204,15 @@ router.get("/s/:link", (req, res) => {
         res.status(301).redirect(mainLink);
         return;
       }
-      res.json({ error: "Link doesn't exist" });
+      res.status(301).redirect('errorPage.html');
       return
     })
     .catch((err) => {
-      res.json({ error: err });
+      res.json({err:err});
+      return
     });
+    res.status(301).redirect('errorPage.html');
+
 });
 
 //Admin Route
