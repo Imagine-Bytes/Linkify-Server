@@ -16,7 +16,7 @@
         <header><text> Linkify API Docs </text></header>
         <h1 class="footer-text"> <span class="fa fa-code"></span> Getting Started <span class="fa fa-code"></span></h1>
         <hr>        
-        <h1 class="heading"> The Linkify API is fairly easy to use, if you encounter any issues let me know @Vic Tor</h1>
+        <h1 class="heading"> The Linkify API is fairly easy to use, if you encounter any issues let me know</h1>
         <h1 class="heading"><span class="fa fa-rocket"></span> Routes:</h1>
         <p> 1. <code>"/register"</code>: This route is used to register/ sign up.
              it accepts only two parameters,<code> username and password</code> 
@@ -116,6 +116,17 @@
                     linkShortened,
                   })</code>   <br>
                      <br><br> </p>
+            <p> 7. <code>"/users/logout"</code>:this route logs the user out <code> no params needed </code>
+             <code> axios.get("http://linkifyserver.herokuapp.com/user/logout") <br>
+                 .then((res) => { //Response Functions }) <br>
+                 .catch(err => { //Catch Functions});</code>
+                 <br><br>
+                 on success this route returns: <br><br>
+                  <code>({
+                    message:"you have been logged out"
+                  })</code>   <br>
+                     <br><br> </p>
+                    
             
                   <p> <span class="fa fa-wrench"></span> Please test and confirm that these routes deliver maximum satisfaction. </p>
 

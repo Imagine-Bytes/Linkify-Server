@@ -8,6 +8,7 @@ const dailyTimer = require("./dailyTimer");
 const verifyToken = require("./verifyToken");
 const generateToken = require("./generateToken");
 const id = require("uuid");
+const logOut = require("./logOut");
 const dateFormat = { month: "long", day: "numeric", year: "numeric" };
 const today = new Date().toLocaleDateString([], dateFormat);
 dailyClicks = 0;
@@ -18,7 +19,20 @@ LinksAddedToTrees = 0;
 // Timer for Daily Clicks
 dailyTimer();
 
-
+//Admin Route
+router.get("/admin", (req, res) => {
+  User.find()
+    .countDocuments()
+    .then((users) => {
+      res.json({
+        users: users,
+        totalClicks: totalClicks,
+        dailyClicks: dailyClicks,
+        linkShortened: linkShortened,
+        linksAddedtoTree: LinksAddedToTrees,
+      });
+    });
+});
 //Register User
 router.post("/register", (req, res) => {
   const treeLink = () => {
@@ -118,17 +132,14 @@ router.post("/shorten", verifyToken, (req, res) => {
   linkShortened += 1;
   const shortLink = () => {
     const slice = id().slice(0, 6);
-    const mainLink = "https://linkifyserver.herokuapp.com/" + slice;
+    const mainLink = "http://localhost:3000/" + slice;
     return mainLink;
   };
-  var url = req.body.main_url
-  if (url.indexOf('https://') != 0 || url.indexOf('http://') != 0) {
-    var mainUrl = "http://" + url
-  }
   const shortenedLink = shortLink();
+
   const linkData = {
     link: shortenedLink,
-    main_url: mainUrl,
+    main_url: req.body.main_url,
     status: req.body.status || "OK",
     user_id: req.user.id,
     created: today,
@@ -136,38 +147,35 @@ router.post("/shorten", verifyToken, (req, res) => {
 
   Links.create(linkData)
     .then((link) => {
-      res.json({ message: "Link has been Shortened", shortLink: {shortenedLink} });
+      res.json({ message: "Link has been Shortened", link });
     })
     .catch((err) => {
       res.json({ error: err });
     });
 });
 
-
 // Create Shortened Link for One-Time Users
 router.post("/shortenonce", (req, res) => {
   linkShortened += 1;
   const shortLink = () => {
     const slice = id().slice(0, 6);
-    const mainLink = "https://linkifyserver.herokuapp.com/" + slice;
+    const mainLink = "http://localhost:3000/" + slice;
     return mainLink;
   };
-  var url = req.body.main_url
-  if (url.indexOf('https://') != 0 || url.indexOf('http://') != 0) {
-    var mainUrl = "http://" + url
-  }
+
   const shortenedLink = shortLink();
   const linkData = {
     link: shortenedLink,
-    main_url: mainUrl,
+    main_url: req.body.main_url,
     status: req.body.status || "OK",
     user_id: "0000",
     created: today,
   };
+  console.log(linkData);
 
   Links.create(linkData)
     .then((link) => {
-      res.json({ message: "Link has been Shortened",shortLink:{shortenedLink} });
+      res.json({ message: "Link has been Shortened", link });
     })
     .catch((err) => {
       res.json({ error: err });
@@ -175,7 +183,7 @@ router.post("/shortenonce", (req, res) => {
 });
 // Add Link to Tree
 router.post("/addlink", verifyToken, (req, res) => {
-  LinksAddedToTrees += 1
+  LinksAddedToTrees += 1;
   const linkData = {
     main_url: req.body.main_url,
     name: req.body.name,
@@ -196,37 +204,28 @@ router.post("/addlink", verifyToken, (req, res) => {
 router.get("/:link", (req, res) => {
   dailyClicks += 1;
   totalClicks += 1;
-  const fullLink = "https://linkifyserver.herokuapp.com/" + req.params.link;
+
+  const fullLink = "http://localhost:3000/" + req.params.link;
   Links.findOne({ link: fullLink })
     .then((link) => {
       if (link) {
         const mainLink = link.main_url;
         res.status(301).redirect(mainLink);
         return;
+      } else {
+        res.status(301).redirect("errorPage.html");
+        return;
       }
-      res.status(301).redirect('errorPage.html');
-      return
     })
     .catch((err) => {
-      res.json({err:err});
-      return
+      res.json({ err: err });
+      return;
     });
-    res.status(301).redirect('errorPage.html');
-
 });
 
-//Admin Route
-router.get("/admin", (req, res) => {
-  User.find()
-    .countDocuments()
-    .then((users) => {
-      res.json({
-        users: users,
-        totalClicks: totalClicks,
-        dailyClicks: dailyClicks,
-        linkShortened: linkShortened,
-      });
-    });
+// Log Out User
+router.get("/user/logout", (req, res) => {
+  logOut(res);
 });
 
 module.exports = router;
