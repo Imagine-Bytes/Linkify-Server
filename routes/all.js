@@ -37,7 +37,7 @@ router.get("/admin", (req, res) => {
 router.post("/register", (req, res) => {
   const treeLink = () => {
     const slice = id().slice(24, 36);
-    const mainLink = "https://linkifyserver.herokuapp.com/t/" + slice;
+    const mainLink = "http://linkifyserver.herokuapp.com/t/" + slice;
     return mainLink;
   };
 
@@ -132,7 +132,7 @@ router.post("/shorten", verifyToken, (req, res) => {
   linkShortened += 1;
   const shortLink = () => {
     const slice = id().slice(0, 6);
-    const mainLink = "http://localhost:3000/" + slice;
+    const mainLink = "http://linkifyserver.herokuapp.com/" + slice;
     return mainLink;
   };
   const shortenedLink = shortLink();
@@ -159,7 +159,7 @@ router.post("/shortenonce", (req, res) => {
   linkShortened += 1;
   const shortLink = () => {
     const slice = id().slice(0, 6);
-    const mainLink = "http://localhost:3000/" + slice;
+    const mainLink = "http://linkifyserver.herokuapp.com/" + slice;
     return mainLink;
   };
 
@@ -205,7 +205,7 @@ router.get("/:link", (req, res) => {
   dailyClicks += 1;
   totalClicks += 1;
 
-  const fullLink = "http://localhost:3000/" + req.params.link;
+  const fullLink = "http://linkifyserver.herokuapp.com/" + req.params.link;
   Links.findOne({ link: fullLink })
     .then((link) => {
       if (link) {
