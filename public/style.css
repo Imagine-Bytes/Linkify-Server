@@ -1,0 +1,79 @@
+body {
+  margin: 0px;
+  font-family: "Montserrat", sans-serif;
+ 
+}
+.bg{
+  -webkit-filter: blur(5px);
+  -moz-filter: blur(5px);
+  -o-filter: blur(5px);
+  -ms-filter: blur(5px);
+  filter: blur(5px);
+  width: 100%;
+  height:100%;
+}
+header {
+  width: auto;
+  height: 30px;
+  padding: 15px 15px;
+  background-color: rgb(37, 36, 36);
+  text-align: center;
+}
+header > text {
+  font-size: x-large;
+  color: white;
+}
+
+.heading {
+  padding-left: 20px;
+  font-size: 2.5vw;
+  font-weight: lighter;
+}
+
+p {
+  font-size: 1.9vw;
+  padding-left: 20px;
+  margin-bottom: 15px;
+}
+.fa-rocket {
+  color: gray;
+}
+.fa-wrench {
+  color: grey;
+}
+.fa-exclamation-triangle {
+  color: gray;
+}
+.fa-pen {
+  color: gray;
+}
+.fa-skull {
+  color: grey;
+}
+.center {
+  display: flex;
+  justify-content: center;
+  font-size: lighter;
+}
+code{
+  font-weight: bold;
+}
+.footer-text{
+  color: black;
+  text-align: center;
+  font-size: x-large;
+  font-weight: lighter;
+}
+.footer-stuff{
+  color: rgb(34, 34, 238);
+  text-align: center;
+  font-size: x-large;
+}
+.footer-img{
+  text-align: center;
+  width: 300px;
+}
+
+.fa-heart{
+  color: red;
+}

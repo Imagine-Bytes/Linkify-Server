@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title> API Docs</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="style.css">
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="../../Montserrat/Montserrat-Regular.ttf">
+    </head>
+    <body>
+        <header><text> Linkify API Docs </text></header>
+        <h1 class="footer-text"> <span class="fa fa-code"></span> Getting Started <span class="fa fa-code"></span></h1>
+        <hr>        
+        <h1 class="heading"> The Linkify API is fairly easy to use, if you encounter any issues let me know</h1>
+        <h1 class="heading"><span class="fa fa-rocket"></span> Routes:</h1>
+        <p> 1. <code>"/register"</code>: This route is used to register/ sign up.
+             it accepts only two parameters,<code> username and password</code> 
+           <br> so your axios or fetch call should look like:<br><br>
+        <code> axios.post("http://linkifyserver.herokuapp.com/register", {username,password}) <br>
+			.then((res) => { //Response Functions }) <br>
+            .catch(err => { //Catch Functions});</code> <br><br>
+        this route returns <br><br>
+         <code>({ message: " User Registered" })</code>  on success <br>
+        <code>({ error: "User already exists" })</code> on duplicate entry</p>
+            <br><br>
+            <p> 2. <code>"/login"</code>: This route is used to login and
+                 it creates a token that gets stored from the server side , token expires in 24
+                 hours and so does the Users' access to his account;
+                  after 24 hours he/she will be required to login again
+                it accepts only two parameters,<code> username and password</code> 
+              <br> so your axios or fetch call should look like:<br><br>
+           <code> axios.post("http://linkifyserver.herokuapp.com/login", {username,password}) <br>
+               .then((res) => { //Response Functions }) <br>
+               .catch(err => { //Catch Functions});</code>
+               <br><br>
+               this route returns <br><br>
+                <code>({ status: "Login Successful" })</code>  on success <br>
+               <code>({ error: "Password is incorrect" })</code> on failure <br>
+               <code>({ error: "User doesn't exist" })</code> when User information doesn't match DB records</p>
+                   <br><br> </p>
+
+                   <p> 3. <code>"/mylinks"</code>: when a user
+                    is logged in, this route returns all shortened links of the user
+                 <br> so your axios or fetch call should look like:<br><br>
+              <code> axios.get("http://linkifyserver.herokuapp.com/mylinks") <br>
+                  .then((res) => { //Response Functions }) <br>
+                  .catch(err => { //Catch Functions});</code>
+                  <br><br>
+                  this route returns <br><br>
+                   <code>({ message: "success", results: [links] })</code>  on success <br>
+                  <code>({ error: "User ID doesn't exist" })</code> on failure
+                      <br><br> </p>
+
+
+                      <p> 3. <code>"/mytree"</code>: when a user
+                        is logged in, this route returns all links that are saved into the Link Tree of the user
+                     <br> so your axios or fetch call should look like:<br><br>
+                  <code> axios.get("http://linkifyserver.herokuapp.com/mytree") <br>
+                      .then((res) => { //Response Functions }) <br>
+                      .catch(err => { //Catch Functions});</code>
+                      <br><br>
+                      this route returns <br><br>
+                       <code>({ message: "success", results: [tree] })</code>  on success <br>
+     if the user hasn't saved any link to his link tree ... <code>results</code> 
+     would be an empty array , the same goes for <code>/mylinks</code>                        <br><br> </p>
+        
+
+     <p> 4. <code>"/shorten"</code>: this is the link shortener route for logged in users, only 
+        parameters required is <code>main_url</code>
+     <br> so your axios or fetch call should look like:<br><br>
+  <code> axios.post("http://linkifyserver.herokuapp.com/shorten", {main_url}) <br>
+      .then((res) => { //Response Functions }) <br>
+      .catch(err => { //Catch Functions});</code>
+      <br><br>
+      this route returns <br><br>
+       <code>({ message: "Link has been Shortened" shortLink:{link}})</code>  on success <br>
+          <br><br> </p>
+
+          <p> 4. <code>"/shortenonce"</code>: same as <code>/shorten</code> but for the homepage
+             where you can just visit the website and shorten your link without having to login, the only parameter is <code>main_url</code>
+         <br> so your axios or fetch call should look like:<br><br>
+      <code> axios.post("http://linkifyserver.herokuapp.com/shortenonce", {main_url}) <br>
+          .then((res) => { //Response Functions }) <br>
+          .catch(err => { //Catch Functions});</code>
+          <br><br>
+          this route returns <br><br>
+           <code>({ message: "Link has been Shortened", shortLink:{link}})</code>  on success <br>
+              <br><br> </p>
+
+              <p> 5. <code>"/addlink"</code>: used to add links to a user link tree, the only required parameters are <code> name(which will be displayed on the link tree) and main_url</code>
+            <br> so your axios or fetch call should look like:<br><br>
+         <code> axios.post("http://linkifyserver.herokuapp.com/addlink", {name,main_url}) <br>
+             .then((res) => { //Response Functions }) <br>
+             .catch(err => { //Catch Functions});</code>
+             <br><br>
+             this route returns <br><br>
+              <code>({ message: "Link has been added to Tree"})</code>  on success <br>
+                 <br><br> </p>
+
+            <h1 class="footer-text"> <span class="fa fa-pen"></span> Finally</h1>
+            <p> 6. <code>"/admin"</code>:this route returns  admin page populated with <code> total users , totalClicks, dailyClicks, and number of linkShortened</code>
+             <code> axios.get("http://linkifyserver.herokuapp.com/admin") <br>
+                 .then((res) => { //Response Functions }) <br>
+                 .catch(err => { //Catch Functions});</code>
+                 <br><br>
+                 on success this route returns: <br><br>
+                  <code>({
+                    users, 
+                    totalClicks, 
+                    dailyClicks,
+                    linkShortened,
+                  })</code>   <br>
+                     <br><br> </p>
+            <p> 7. <code>"/users/logout"</code>:this route logs the user out <code> no params needed </code>
+             <code> axios.get("http://linkifyserver.herokuapp.com/user/logout") <br>
+                 .then((res) => { //Response Functions }) <br>
+                 .catch(err => { //Catch Functions});</code>
+                 <br><br>
+                 on success this route returns: <br><br>
+                  <code>({
+                    message:"you have been logged out"
+                  })</code>   <br>
+                     <br><br> </p>
+                    
+            
+                  <p> <span class="fa fa-wrench"></span> Please test and confirm that these routes deliver maximum satisfaction. </p>
+
+                     <p> <span class="fa fa-exclamation-triangle"></span> Caution: when a user is not logged in , access is denied to 
+                    all routes except: <br> <code>/shortenonce, /login and /admin</code> <br> while throwing an error
+                <code>res.status(401).json({message:"You need to Login"})</code> </p>
+        
+   
+</div><hr>
+
+ <h1 class="footer-text"> <span class=" fa fa-code"></span> And we're done here... <span class=" fa fa-code"> </h1>
+    <p class="footer-stuff"> Made with <span class="fa fa-heart"></span> @Imagine_Bytes</p>
+
+    </body>
+</html>
