@@ -11,6 +11,6 @@ const generateToken = (res, link , id,username) => {
     expires: new Date(Date.now() + expiration),
     secure: false, // set to true if your using https
     httpOnly: true,
-  });
+  }).json({status:"Logged In", token});
 };
 module.exports = generateToken
