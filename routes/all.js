@@ -85,7 +85,6 @@ router.post("/login", (req, res) => {
           const link = user.tree_link;
           const username = user.username;
           generateToken(res, link, id, username);
-          res.json({ status: "Login Successful" });
           return;
         } else {
           res.json({ error: "Password is incorrect" });
